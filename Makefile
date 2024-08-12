@@ -6,13 +6,14 @@
 #    By: myassine <myassine@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/10 16:22:25 by myassine          #+#    #+#              #
-#    Updated: 2024/08/10 16:22:35 by myassine         ###   ########.fr        #
+#    Updated: 2024/08/12 18:50:16 by myassine         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = btc
+NAME = ircServeur
 
-SRCS = main.cpp
+SRCS = 	main.cpp \
+		tools.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

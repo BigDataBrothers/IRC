@@ -6,12 +6,11 @@
 /*   By: myassine <myassine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 16:26:53 by myassine          #+#    #+#             */
-/*   Updated: 2024/08/10 21:15:26 by myassine         ###   ########.fr       */
+/*   Updated: 2024/08/12 18:49:53 by myassine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc.hpp"
-
 
 void error(std::string msg)
 {
@@ -20,5 +19,9 @@ void error(std::string msg)
 }
 
 bool is_numeric(const std::string& str) {
-    return !str.empty() && std::all_of(str.begin(), str.end(), ::isdigit);
+    if (str.empty()) return false;
+    for (std::string::const_iterator it = str.begin(); it != str.end(); ++it)
+        if (!std::isdigit(*it))
+            return false;
+    return true;
 }
