@@ -6,7 +6,7 @@
 /*   By: myassine <myassine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 16:26:53 by myassine          #+#    #+#             */
-/*   Updated: 2024/08/12 18:49:53 by myassine         ###   ########.fr       */
+/*   Updated: 2024/08/15 19:02:39 by myassine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 void error(std::string msg)
 {
-    std::cerr << msg << std::endl;
-    exit(1);
+    std::cerr << "ERREUR:" << std::endl << msg << std::endl;
+    exit(EXIT_FAILURE);
 }
 
 bool is_numeric(const std::string& str) {
