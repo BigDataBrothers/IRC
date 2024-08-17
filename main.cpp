@@ -6,7 +6,7 @@
 /*   By: myassine <myassine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 16:27:43 by myassine          #+#    #+#             */
-/*   Updated: 2024/08/15 22:08:31 by myassine         ###   ########.fr       */
+/*   Updated: 2024/08/17 20:56:46 by myassine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,12 +167,11 @@ void IRCServer::acceptNewConnections() {
         pfd_client.events = POLLIN;
         pfd_client.revents = 0;
         fds.push_back(pfd_client); // Ajouter le nouveau client aux structures nécessaires
-        client_fds.push_back(client_fd);
+        clients[client_fd] = Client(client_fd);
     }
 }
 
 void IRCServer::handleClientMessage(int client_fd) {
-    std::cout << "TEST\n";
     char buffer[BUFFER_SIZE];
     memset(buffer, 0, sizeof(buffer));
     ssize_t len = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
@@ -181,7 +180,7 @@ void IRCServer::handleClientMessage(int client_fd) {
             std::cout << "Client déconnecté" << std::endl;
         else
             error("recv a échouer");
-        
+
         // Fermer et retirer le client
         close(client_fd);
         for (std::vector<struct pollfd>::iterator it = fds.begin() + 1; it != fds.end(); ++it) {
@@ -191,12 +190,43 @@ void IRCServer::handleClientMessage(int client_fd) {
                 ++it;
         }
         client_fds.erase(std::remove(client_fds.begin(), client_fds.end(), client_fd), client_fds.end());
-    } else {
-        buffer[len] = '\0';
-        std::cout << "Message reçu: " << buffer << std::endl;
-        if(send(client_fd, "Message reçu\n", 15, 0) < 0)
-            error("send a échouer");
     }
+    buffer[len] = '\0';
+    std::string message(buffer);
+    std::istringstream iss(message);
+    std::string command;
+    iss >> command;
+
+    
+    // if (command == "NICK" && clients[client_fd].hasNick == false) {
+    //     std::string nick;
+    //     iss >> nick;
+    //     clients[client_fd].nickname = nick;
+    //     clients[client_fd].hasNick = true;
+    //     std::cout << "NICK command received: " << nick << std::endl;
+    // } else if (command == "USER" && clients[client_fd].hasUser == false) {
+    //     std::string username, hostname, servername, realname;
+    //     iss >> username >> hostname >> servername;
+    //     getline(iss, realname);
+    //     if (!realname.empty() && realname[0] == ':') {
+    //         realname = realname.substr(1); // Supprimer les deux-points au début
+    //     }
+    //     clients[client_fd].username = username;
+    //     clients[client_fd].realname = realname;
+    //     clients[client_fd].hasUser = true;
+    //     std::cout << "USER command received: " << username << ", " << realname << std::endl;
+    // } else {
+    //     std::cout << clients[client_fd].username << ": Commande non reconnue: " << message << std::endl;
+    // }
+
+    // Vérification si le client est complètement connecté
+    // if (clients[client_fd].hasNick && clients[client_fd].hasUser) {
+    //     std::string welcomeMsg = "001 " + clients[client_fd].nickname + " :Bienvenue sur IRC\n";
+    //     send(client_fd, welcomeMsg.c_str(), welcomeMsg.size(), 0);
+    // }
+    std::cout << "Message reçu: " << buffer << std::endl;
+    if(send(client_fd, "Message reçu\n", 15, 0) < 0)
+        error("send a échouer");
 }
 
 int main(int argc, char *argv[]) {

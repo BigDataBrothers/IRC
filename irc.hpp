@@ -6,15 +6,17 @@
 /*   By: myassine <myassine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 16:23:08 by myassine          #+#    #+#             */
-/*   Updated: 2024/08/15 21:18:18 by myassine         ###   ########.fr       */
+/*   Updated: 2024/08/17 20:23:22 by myassine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include <map>
 #include <vector>
 #include <string>
 #include <poll.h>
+#include <sstream>
 #include <fcntl.h>
 #include <errno.h>
 #include <cstdlib>
@@ -29,6 +31,19 @@
 
 #define BUFFER_SIZE 256
 
+struct Client {
+    int fd;                // Descripteur de fichier pour le socket
+    std::string nickname;  // Pseudonyme choisi par l'utilisateur
+    std::string username;  // Nom d'utilisateur
+    std::string realname;  // Nom réel
+    bool hasNick;          // L'utilisateur a-t-il défini un NICK ?
+    bool hasUser;          // L'utilisateur a-t-il défini un USER ?
+
+    Client() : fd(-1), hasNick(false), hasUser(false) {}
+    Client(int fd) : fd(fd), hasNick(false), hasUser(false) {}
+};
+
+
 class IRCServer {
     public:
             IRCServer(unsigned short port, std::string npassword);
@@ -39,6 +54,7 @@ class IRCServer {
             std::string password;
             struct sockaddr_in server_addr;
             std::vector<struct pollfd> fds;
+            std::map<int, Client> clients;
             std::vector<int> client_fds;
             
             void acceptNewConnections();
