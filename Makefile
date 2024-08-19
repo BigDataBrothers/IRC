@@ -6,14 +6,15 @@
 #    By: myassine <myassine@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/10 16:22:25 by myassine          #+#    #+#              #
-#    Updated: 2024/08/12 18:50:16 by myassine         ###   ########.fr        #
+#    Updated: 2024/08/19 23:37:28 by myassine         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = ircServeur
+NAME = ServerServeur
 
-SRCS = 	main.cpp \
-		tools.cpp
+SRCS = 	main.cpp	\
+		Server.cpp	\
+		Client.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
