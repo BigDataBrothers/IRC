@@ -12,6 +12,8 @@
 #include <unistd.h>
 #include <poll.h>
 
+#include <sstream> 
+
 #include "Client.hpp"
 
 class Channel; // Déclaration anticipée
