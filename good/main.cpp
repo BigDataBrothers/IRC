@@ -11,12 +11,12 @@ bool is_numeric(const std::string& str) {
 void verifArgv(int argc, char **argv) {
     if (argc != 3) {
         std::cerr << "./serveur [numero de port] [mots de passe]" << std::endl;
-        EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     std::string portNum = argv[1];
     if(is_numeric(portNum) == false || std::atoi(portNum.c_str()) < 1024 || std::atoi(portNum.c_str()) > 65535) {
         std::cerr << "Numero de port invalide (1024 ~= 65535)" << std::endl;
-        EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -27,13 +27,13 @@ int main(int argc, char **argv) {
     std::string password = argv[2];
     try {
         Server server(port, password);
-        std::cout << "Server started on port " << port << std::endl;
+        // std::cout << "Server started on port " << port << std::endl;
 
         server.start();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
-
-    return EXIT_SUCCESS;
+    std::cout << "Server shutting down." << std::endl;
+    exit(EXIT_SUCCESS);
 }
