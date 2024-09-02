@@ -2,6 +2,9 @@ NAME = ServerIRC
 
 SRCS = 	main.cpp	\
 		Server.cpp	\
+		Client.cpp	\
+		CommandHandler.cpp \
+		NickCommand.cpp \
 
 OBJS = $(SRCS:.cpp=.o)
 

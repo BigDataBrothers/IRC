@@ -30,6 +30,7 @@ Server::Server(int port, std::string password) : _port(port), _password(password
 }
 
 void Server::acceptNewConnection() {
+    // Ajout du mdp ici
     struct sockaddr_in clientAddr;
     socklen_t clientLen = sizeof(clientAddr);
     int clientSocket = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientLen);
@@ -43,6 +44,8 @@ void Server::acceptNewConnection() {
     client_fd.fd = clientSocket;
     client_fd.events = POLLIN;
     _poll_fds.push_back(client_fd);
+
+     clients[clientSocket] = Client(clientSocket);
 }
 
 void Server::handleClientMessage(int clientSocket) {
@@ -51,7 +54,6 @@ void Server::handleClientMessage(int clientSocket) {
     if (bytes_received <= 0) {
         std::cerr << "Connexion fermée ou erreur lors de la réception" << std::endl;
         close(clientSocket);
-        // Supprimer le client de la liste des descripteurs surveillés
         for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
             if (it->fd == clientSocket) {
                 _poll_fds.erase(it);
@@ -61,14 +63,10 @@ void Server::handleClientMessage(int clientSocket) {
         return;
     }
     buffer[bytes_received] = '\0';
-    std::cout << "Message reçu: " << buffer << std::endl;
-
-    std::string response = "Message envoyé: ";
-    response += buffer;
-
-    int bytes_sent = send(clientSocket, response.c_str(), response.size(), 0);
-    if (bytes_sent < 0)
-        std::cerr << "Erreur lors de l'envoi du message" << std::endl;
+    std::cout << "Message reçu: " << buffer;
+   //parser buffer pour les cmd
+    Client& client = clients[clientSocket];
+    commandHandler.handleCommand(client, buffer);
 }
 
 void Server::start() {

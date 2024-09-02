@@ -27,8 +27,6 @@ int main(int argc, char **argv) {
     std::string password = argv[2];
     try {
         Server server(port, password);
-        // std::cout << "Server started on port " << port << std::endl;
-
         server.start();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

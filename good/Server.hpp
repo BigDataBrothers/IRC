@@ -1,6 +1,10 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include "CommandHandler.hpp"
+#include "Client.hpp"
+
+#include <map>
 #include <poll.h>
 #include <vector>
 #include <string>
@@ -28,12 +32,8 @@ class Server {
     int _port;
     std::vector<pollfd> _poll_fds;
     std::string         _password;
-
-    // private:
-    //     struct sockaddr_in  _addr;
-    //     int                 _port;
-    //     int                 _serverSocket;
-    //     std::vector<pollfd> _poll_fds;
+    std::map<int, Client> clients; // Map des sockets clients vers les objets Client
+    CommandHandler commandHandler; // Ajoutez un membre CommandHandler
 };
 
 #endif
