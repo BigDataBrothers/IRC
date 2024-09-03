@@ -1,7 +1,9 @@
 #include "CommandHandler.hpp"
 
 CommandHandler::CommandHandler() {
-    registerCommand("/nick", new NickCommand());
+    registerCommand("CAP", new CapCommand());
+    registerCommand("NICK", new NickCommand());
+    registerCommand("PRIVMSG", new PrivmsgCommand());
     // Enregistrez d'autres commandes ici
 }
 

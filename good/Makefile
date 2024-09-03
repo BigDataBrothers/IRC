@@ -4,7 +4,9 @@ SRCS = 	main.cpp	\
 		Server.cpp	\
 		Client.cpp	\
 		CommandHandler.cpp \
+		CapCommand.cpp \
 		NickCommand.cpp \
+		PrivmsgCommand.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

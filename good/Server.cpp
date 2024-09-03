@@ -7,7 +7,12 @@ Server::Server(int port, std::string password) : _port(port), _password(password
         std::cerr << "Erreur lors de la création du socket" << std::endl;
         exit(EXIT_FAILURE);
     }
-
+    int opt = 1;
+    if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        std::cerr << "Erreur lors de la configuration du socket" << std::endl;
+        close(_serverSocket);
+        exit(EXIT_FAILURE);
+    }
     struct sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
@@ -63,7 +68,7 @@ void Server::handleClientMessage(int clientSocket) {
         return;
     }
     buffer[bytes_received] = '\0';
-    std::cout << "Message reçu: " << buffer;
+    std::cout << "[" << clients[clientSocket].getNickname() << "] " << buffer;
    //parser buffer pour les cmd
     Client& client = clients[clientSocket];
     commandHandler.handleCommand(client, buffer);

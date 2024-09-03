@@ -1,9 +1,12 @@
 #ifndef COMMANDHANDLER_HPP
 #define COMMANDHANDLER_HPP
 
+#include "PrivmsgCommand.hpp"
 #include "NickCommand.hpp"
+#include "CapCommand.hpp"
 #include "Command.hpp"
 #include "Client.hpp"
+
 #include <sys/socket.h>
 #include <iostream>
 #include <sstream>

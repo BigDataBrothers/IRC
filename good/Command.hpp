@@ -3,6 +3,7 @@
 
 #include "Client.hpp"
 #include <vector>
+#include <sys/socket.h>
 
 class Command {
 public:
