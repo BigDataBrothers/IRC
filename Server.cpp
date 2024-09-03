@@ -1,166 +1,99 @@
 #include "Server.hpp"
-#include <unistd.h>
-#include <fcntl.h>
 
-Server::Server(int port, std::string Npassword) : password(Npassword) {
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_socket < 0) {
-        std::cerr << "Error creating socket." << std::endl;
+Server::Server(int port, std::string password) : _port(port), _password(password) {
+    // Initialisation du socket du serveur
+    _serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (_serverSocket < 0) {
+        std::cerr << "Erreur lors de la création du socket" << std::endl;
         exit(EXIT_FAILURE);
     }
-    int optval = 1;
-    if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
-        std::cerr << "Error setting socket options." << std::endl;
-        close(server_socket);
+    int opt = 1;
+    if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        std::cerr << "Erreur lors de la configuration du socket" << std::endl;
+        close(_serverSocket);
         exit(EXIT_FAILURE);
     }
-    std::memset(&_addr, 0, sizeof(_addr));
-    _addr.sin_family = AF_INET;
-    _addr.sin_addr.s_addr = INADDR_ANY;
-    _addr.sin_port = htons(port);
-    if (bind(server_socket, (struct sockaddr*)&_addr, sizeof(_addr)) < 0) {
-        std::cerr << "Error binding socket." << std::endl;
-        close(server_socket);
+    struct sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    serverAddr.sin_port = htons(_port);
+
+    if (bind(_serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
+        std::cerr << "Erreur lors du bind" << std::endl;
         exit(EXIT_FAILURE);
     }
-    configureSocketNonBlocking(server_socket);
-    if (listen(server_socket, SOMAXCONN) < 0) {
-        std::cerr << "Error listening on socket." << std::endl;
-        close(server_socket);
+
+    if (listen(_serverSocket, 5) < 0) {
+        std::cerr << "Erreur lors du listen" << std::endl;
         exit(EXIT_FAILURE);
     }
-    pollfd pfd;
-    pfd.fd = server_socket;
-    pfd.events = POLLIN;
-    pfd.revents = 0;
-    poll_fds.push_back(pfd);
+
+    pollfd server_fd;
+    server_fd.fd = _serverSocket;
+    server_fd.events = POLLIN;
+    _poll_fds.push_back(server_fd);
 }
 
-Server::~Server() {
-    stop();
+void Server::acceptNewConnection() {
+    // Ajout du mdp ici
+    struct sockaddr_in clientAddr;
+    socklen_t clientLen = sizeof(clientAddr);
+    int clientSocket = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientLen);
+    if (clientSocket < 0) {
+        std::cerr << "Erreur lors de l'acceptation d'une connexion" << std::endl;
+        return;
+    }
+
+    std::cout << "Nouveau client connecté" << std::endl;
+    pollfd client_fd;
+    client_fd.fd = clientSocket;
+    client_fd.events = POLLIN;
+    _poll_fds.push_back(client_fd);
+
+     clients[clientSocket] = Client(clientSocket);
+}
+
+void Server::handleClientMessage(int clientSocket) {
+    char buffer[1024];
+    int bytes_received = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    if (bytes_received <= 0) {
+        std::cerr << "Connexion fermée ou erreur lors de la réception" << std::endl;
+        close(clientSocket);
+        for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
+            if (it->fd == clientSocket) {
+                _poll_fds.erase(it);
+                break;
+            }
+        }
+        return;
+    }
+    buffer[bytes_received] = '\0';
+    std::cout << "[" << clients[clientSocket].getNickname() << "] " << buffer;
+   //parser buffer pour les cmd
+    Client& client = clients[clientSocket];
+    commandHandler.handleCommand(client, buffer);
 }
 
 void Server::start() {
-    while (true)
-        handleEvents();
-}
+    std::cout << "Serveur IRC démarré sur le port " << _port << std::endl;
 
-void Server::stop() {
-    for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-        removeClient(*it);
-    close(server_socket);
-}
-
-void Server::acceptConnection() {
-    struct sockaddr_in client_addr;
-    socklen_t client_len = sizeof(client_addr);
-    int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
-
-    if (client_socket < 0) {
-        std::cerr << "Error accepting connection." << std::endl;
-        return;
-    }
-    Client* new_client = new Client(client_socket/*, client_addr*/);
-    clients.push_back(new_client);
-    
-    pollfd pfd;
-    pfd.fd = client_socket;
-    pfd.events = POLLIN;
-    pfd.revents = 0;
-    poll_fds.push_back(pfd);
-
-    std::string password_prompt = "Password: ";
-    send(client_socket, password_prompt.c_str(), password_prompt.size(), 0);
-}
-
-void Server::removeClient(Client* client) {
-    std::vector<Client*>::iterator it = std::find(clients.begin(), clients.end(), client);
-    if (it != clients.end()) {
-        clients.erase(it);
-        close(client->getSocketFd());
-        delete client;
-    }
-
-    for (std::vector<pollfd>::iterator pfd_it = poll_fds.begin(); pfd_it != poll_fds.end(); ++pfd_it) {
-        if (pfd_it->fd == client->getSocketFd()) {
-            poll_fds.erase(pfd_it);
-            break;
+    while (true) {
+        int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
+        if (poll_count < 0) {
+            std::cerr << "Erreur lors de l'appel à poll()" << std::endl;
+            exit(EXIT_FAILURE);
         }
-    }
-}
 
-// Channel* Server::createChannel(const std::string& channelName) {
-//     Channel* new_channel = new Channel(channelName);
-//     channels.push_back(new_channel);
-//     return new_channel;
-// }
-
-
-// Channel* Server::findChannel(const std::string& channelName) {
-//     for (std::vector<Channel*>::iterator it = channels.begin(); it != channels.end(); ++it)
-//         if ((*it)->getName() == channelName)
-//             return *it;
-//     return nullptr;
-// }
-
-Client* Server::findClientBySocket(int socket_fd) {
-    for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-        if ((*it)->getSocketFd() == socket_fd)
-            return *it;
-    return NULL;
-}
-
-void Server::authenticateClient(Client* client) {
-    for(int i = 0; i != 3; i++) {
-        char buffer[1024];
-        ssize_t len = recv(client->getSocketFd(), buffer, sizeof(buffer) - 1, 0);
-        password.push_back('\n');
-        if (len > 0) {
-            buffer[len] = '\0';
-
-            std::string received_password(buffer);
-            if (received_password.find("\r") != std::string::npos)
-                received_password = received_password.substr(0, received_password.find("\r"));
-            if (received_password == password) {
-                // Authentification réussie
-                std::string welcome_message = "Authentication successful.\r\n";
-                send(client->getSocketFd(), welcome_message.c_str(), welcome_message.size(), 0);
-            } else {
-                // Authentification échouée
-                std::string error_message = "Invalid password.\r\n";
-                send(client->getSocketFd(), error_message.c_str(), error_message.size(), 0);
-                removeClient(client);
+        for (size_t i = 0; i < _poll_fds.size(); ++i)
+            if (_poll_fds[i].revents & POLLIN) {
+                if (_poll_fds[i].fd == _serverSocket)
+                    acceptNewConnection();
+                else
+                    handleClientMessage(_poll_fds[i].fd);
             }
-        } else
-            removeClient(client);
     }
 }
 
-void Server::handleEvents() {
-    int nfds = poll(&poll_fds[0], poll_fds.size(), -1);
-
-    if (nfds < 0) {
-        std::cerr << "Error in poll." << std::endl;
-        return;
-    }
-
-    for (std::vector<pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); ++it) {
-        if (it->revents & POLLIN) {
-            if (it->fd == server_socket)
-                acceptConnection();
-            else {
-                Client* client = findClientBySocket(it->fd);
-                if (client)
-                    authenticateClient(client);
-            }
-        }
-    }
-}
-
-void configureSocketNonBlocking(int sockfd) {
-    int flags = fcntl(sockfd, F_GETFL, 0);
-    if (flags < 0 || fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) < 0) {
-        std::cerr << "Failed to set socket to non-blocking mode" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+Server::~Server() {
+    close(_serverSocket);
 }

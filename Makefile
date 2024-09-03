@@ -1,20 +1,12 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: myassine <myassine@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/08/10 16:22:25 by myassine          #+#    #+#              #
-#    Updated: 2024/08/19 23:37:28 by myassine         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-NAME = ServerServeur
+NAME = ServerIRC
 
 SRCS = 	main.cpp	\
 		Server.cpp	\
-		Client.cpp
+		Client.cpp	\
+		CommandHandler.cpp \
+		CapCommand.cpp \
+		NickCommand.cpp \
+		PrivmsgCommand.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

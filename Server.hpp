@@ -1,46 +1,39 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <iostream>
+#include "CommandHandler.hpp"
+#include "Client.hpp"
+
+#include <map>
+#include <poll.h>
 #include <vector>
 #include <string>
+#include <cstdlib>
 #include <cstring>
-#include <algorithm>
+#include <iostream>
+#include <unistd.h>
+#include <exception>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <unistd.h>
-#include <poll.h>
-
-#include <sstream> 
-
-#include "Client.hpp"
-
-class Channel; // Déclaration anticipée
 
 class Server {
-public:
-    Server(int port, std::string Npassword);
-    ~Server();
-    void start();
-    void stop();
+    public:
+        Server(int port, std::string password);
+        ~Server();
 
-private:
-    void acceptConnection();
-    void removeClient(Client* client);
-    // Channel* findChannel(const std::string& channelName);
-    Client* findClientBySocket(int socket_fd);
-    void handleEvents();
-    void authenticateClient(Client* client);
+        void start();
+        void handleClient(int client_socket);
+    private:
+    void acceptNewConnection();
+    void handleClientMessage(int clientSocket);
 
-    int server_socket;
-    std::string password;
-    struct sockaddr_in _addr;
-    std::vector<Client*> clients;
-    // std::vector<Channel*> channels;
-    std::vector<pollfd> poll_fds;
+    int _serverSocket;
+    int _port;
+    std::vector<pollfd> _poll_fds;
+    std::string         _password;
+    std::map<int, Client> clients; // Map des sockets clients vers les objets Client
+    CommandHandler commandHandler; // Ajoutez un membre CommandHandler
 };
 
-void configureSocketNonBlocking(int sockfd);
-
-#endif // SERVER_HPP
+#endif
