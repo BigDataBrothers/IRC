@@ -11,6 +11,7 @@ class Client {
         int getSocket() const;
         std::string getNickname() const;
         void setNickname(const std::string& nick);
+        // void receiveMessages();
 
     private:
         int _socket;

@@ -44,13 +44,14 @@ void Server::acceptNewConnection() {
         return;
     }
 
-    std::cout << "Nouveau client connecté" << std::endl;
-    pollfd client_fd;
-    client_fd.fd = clientSocket;
-    client_fd.events = POLLIN;
-    _poll_fds.push_back(client_fd);
+     pollfd pfd = {clientSocket, POLLIN, 0};
+    // pollfd client_fd;
+    // client_fd.fd = clientSocket;
+    // client_fd.events = POLLIN;
+    _poll_fds.push_back(pfd);
 
      clients[clientSocket] = Client(clientSocket);
+    std::cout << "Nouveau client connecté" << std::endl;
 }
 
 void Server::handleClientMessage(int clientSocket) {
@@ -65,13 +66,14 @@ void Server::handleClientMessage(int clientSocket) {
                 break;
             }
         }
+         clients.erase(clientSocket);
         return;
     }
     buffer[bytes_received] = '\0';
     std::cout << "[" << clients[clientSocket].getNickname() << "] " << buffer;
    //parser buffer pour les cmd
     Client& client = clients[clientSocket];
-    commandHandler.handleCommand(client, buffer);
+    commandHandler.handleCommand(client, buffer, clients);
 }
 
 void Server::start() {

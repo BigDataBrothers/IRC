@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "PrivmsgCommand.hpp"
 
 bool is_numeric(const std::string& str) {
     if (str.empty()) return false;
@@ -27,6 +28,7 @@ int main(int argc, char **argv) {
     std::string password = argv[2];
     try {
         Server server(port, password);
+        
         server.start();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

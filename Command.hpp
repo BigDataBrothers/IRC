@@ -4,6 +4,8 @@
 #include "Client.hpp"
 #include <vector>
 #include <sys/socket.h>
+#include <map>
+#include <string>
 
 class Command {
 public:
