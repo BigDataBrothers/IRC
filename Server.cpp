@@ -44,13 +44,16 @@ void Server::acceptNewConnection() {
         return;
     }
 
-     pollfd pfd = {clientSocket, POLLIN, 0};
-    // pollfd client_fd;
-    // client_fd.fd = clientSocket;
-    // client_fd.events = POLLIN;
+    pollfd pfd = {clientSocket, POLLIN, 0};
     _poll_fds.push_back(pfd);
 
-     clients[clientSocket] = Client(clientSocket);
+     clientCounter++;
+    std::stringstream ss;
+    ss << "Guest" << clientCounter;
+    std::string nickname = ss.str();
+
+    // Ajouter le nouveau client à la map avec le pseudo généré
+    clients[clientSocket] = Client(clientSocket, nickname);
     std::cout << "Nouveau client connecté" << std::endl;
 }
 
@@ -59,6 +62,7 @@ void Server::handleClientMessage(int clientSocket) {
     int bytes_received = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     if (bytes_received <= 0) {
         std::cerr << "Connexion fermée ou erreur lors de la réception" << std::endl;
+         this->clientCounter--;
         close(clientSocket);
         for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
             if (it->fd == clientSocket) {
@@ -79,6 +83,7 @@ void Server::handleClientMessage(int clientSocket) {
 void Server::start() {
     std::cout << "Serveur IRC démarré sur le port " << _port << std::endl;
 
+    this->clientCounter = 0;
     while (true) {
         int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
         if (poll_count < 0) {

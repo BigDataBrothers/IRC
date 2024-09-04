@@ -12,7 +12,7 @@ class PrivmsgCommand : public Command{
         PrivmsgCommand();
         ~PrivmsgCommand();
         void execute(Client& client, const std::vector<std::string>& args);
-        // void sendMsg(Client& client, const std::vector<std::string>& args, std::map<int, Client>& clients);
+        void sendMsg(Client& client, const std::vector<std::string>& args, std::map<int, Client>& clients);
     // private:
         // Server& server;
 };

@@ -24,15 +24,15 @@ void CommandHandler::handleCommand(Client& client, const std::string& message, s
     std::string commandName = tokens[0];
     std::map<std::string, Command*>::iterator it = commands.find(commandName);
     if (it != commands.end()) {
-        // if (commandName == "PRIVMSG") {
-            // PrivmsgCommand Msg;
-            // Msg.sendMsg(client, tokens, clients);
-        // } else {
+        if (commandName == "PRIVMSG") {
+            PrivmsgCommand Msg;
+            Msg.sendMsg(client, tokens, clients);
+        } else {
             // Exécuter la commande normalement
         (void)clients;
         it->second->execute(client, tokens);
-    }
-    else {
+        }
+    } else {
         std::string response = "Commande inconnue: " + commandName + "\r\n";
         send(client.getSocket(), response.c_str(), response.size(), 0);
     }

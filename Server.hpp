@@ -28,6 +28,7 @@ class Server {
     void acceptNewConnection();
     void handleClientMessage(int clientSocket);
 
+    int clientCounter;
     int _serverSocket;
     int _port;
     std::vector<pollfd> _poll_fds;
