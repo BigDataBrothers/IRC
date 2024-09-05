@@ -6,7 +6,8 @@ SRCS = 	main.cpp	\
 		CommandHandler.cpp \
 		CapCommand.cpp \
 		NickCommand.cpp \
-		PrivmsgCommand.cpp
+		PrivmsgCommand.cpp \
+		PingCommand.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

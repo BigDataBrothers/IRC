@@ -1,5 +1,10 @@
 #include "CapCommand.hpp"
 
+void MsgServer(std::string nickname, int clientSocket) {
+        std::string msg = ":server 001 " + nickname + " :Welcome to the IRC Network " + nickname + "\r\n";
+        std::cout << msg << std::endl;
+        send(clientSocket, msg.c_str(), msg.size(), 0);
+}
 
 CapCommand::~CapCommand() {}
 
@@ -26,8 +31,9 @@ void CapCommand::execute(Client& client, const std::vector<std::string>& args) {
         std::string response = "CAP * END\r\n";
         send(client.getSocket(), response.c_str(), response.size(), 0);
         // Finaliser la négociation des capacités
-        std::string welcomeMessage = ":server 001 " + client.getNickname() + " :Bienvenue sur le serveur IRC\r\n";
-        send(client.getSocket(), welcomeMessage.c_str(), welcomeMessage.size(), 0);
+        // std::string welcomeMessage = ":server 001 " + client.getNickname() + " :Bienvenue sur le serveur IRC\r\n";
+        // send(client.getSocket(), welcomeMessage.c_str(), welcomeMessage.size(), 0);
+        MsgServer(client.getNickname(), client.getSocket());
     } else {
         std::string response = "Erreur: CAP sous-commande inconnue\r\n";
         send(client.getSocket(), response.c_str(), response.size(), 0);

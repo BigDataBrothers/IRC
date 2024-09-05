@@ -29,6 +29,12 @@ int main(int argc, char **argv) {
     try {
         Server server(port, password);
         
+        char hostname[1024];
+        if (gethostname(hostname, sizeof(hostname)) == 0) {
+            std::cout << "Nom du serveur (hostname) : " << hostname << std::endl;
+        } else {
+            std::cerr << "Erreur lors de la récupération du nom du serveur" << std::endl;
+        }
         server.start();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

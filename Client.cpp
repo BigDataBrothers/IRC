@@ -5,9 +5,7 @@
 
 Client::Client() {}
 
-Client::Client(int socket, std::string nick) : _socket(socket), _nickname(nick) {
-
-}
+Client::Client(int socket, std::string nick) : _socket(socket), _nickname(nick) {}
 
 int Client::getSocket() const {
     return _socket;

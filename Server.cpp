@@ -28,6 +28,13 @@ Server::Server(int port, std::string password) : _port(port), _password(password
         exit(EXIT_FAILURE);
     }
 
+    if (gethostname(hostname, sizeof(hostname)) == 0) {
+        std::cout << "Nom d'hôte : " << hostname << std::endl;
+    } else {
+        std::cerr << "Erreur lors de la récupération du nom d'hôte" << std::endl;
+        exit(EXIT_FAILURE);;
+    }
+
     pollfd server_fd;
     server_fd.fd = _serverSocket;
     server_fd.events = POLLIN;
@@ -47,6 +54,12 @@ void Server::acceptNewConnection() {
     pollfd pfd = {clientSocket, POLLIN, 0};
     _poll_fds.push_back(pfd);
 
+    if (clients.find(clientSocket) != clients.end()) {
+        std::cerr << "Client déjà connecté, socket: " << clientSocket << std::endl;
+        close(clientSocket);
+        return;
+    }
+
      clientCounter++;
     std::stringstream ss;
     ss << "Guest" << clientCounter;
@@ -54,7 +67,7 @@ void Server::acceptNewConnection() {
 
     // Ajouter le nouveau client à la map avec le pseudo généré
     clients[clientSocket] = Client(clientSocket, nickname);
-    std::cout << "Nouveau client connecté" << std::endl;
+    std::cout << "Nouveau client connecté avec le pseudo: " << nickname << std::endl;
 }
 
 void Server::handleClientMessage(int clientSocket) {
@@ -99,6 +112,10 @@ void Server::start() {
                     handleClientMessage(_poll_fds[i].fd);
             }
     }
+}
+
+std::string Server::getHostname() const {
+    return this->hostname;
 }
 
 Server::~Server() {

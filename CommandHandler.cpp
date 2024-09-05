@@ -1,10 +1,13 @@
 #include "CommandHandler.hpp"
 #include "PrivmsgCommand.hpp"
+#include "PingCommand.hpp"
 
 CommandHandler::CommandHandler() {
     registerCommand("CAP", new CapCommand());
     registerCommand("NICK", new NickCommand());
     registerCommand("PRIVMSG", new PrivmsgCommand());
+    registerCommand("PING", new PingCommand());
+
     // Enregistrez d'autres commandes ici
 }
 
@@ -24,13 +27,15 @@ void CommandHandler::handleCommand(Client& client, const std::string& message, s
     std::string commandName = tokens[0];
     std::map<std::string, Command*>::iterator it = commands.find(commandName);
     if (it != commands.end()) {
+        std::cout << "Info: " << message;
         if (commandName == "PRIVMSG") {
             PrivmsgCommand Msg;
-            Msg.sendMsg(client, tokens, clients);
+            Msg.sendMsg(client, tokens, clients);//cmd msg
+        // } else if (commandName == "PING") {
+        //     PingCommand pingCmd;
+        //     pingCmd.execute(client, tokens);  // Appelle la fonction pour exécuter PING
         } else {
-            // Exécuter la commande normalement
-        (void)clients;
-        it->second->execute(client, tokens);
+            it->second->execute(client, tokens);//autre cmd
         }
     } else {
         std::string response = "Commande inconnue: " + commandName + "\r\n";

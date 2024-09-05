@@ -24,6 +24,7 @@ class Server {
 
         void start();
         void handleClient(int client_socket);
+        std::string getHostname() const;
     private:
     void acceptNewConnection();
     void handleClientMessage(int clientSocket);
@@ -35,6 +36,8 @@ class Server {
     std::string         _password;
     std::map<int, Client> clients; // Map des sockets clients vers les objets Client
     CommandHandler commandHandler; // Ajoutez un membre CommandHandler
+    char hostname[256];
 };
+
 
 #endif
