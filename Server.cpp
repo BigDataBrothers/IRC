@@ -1,15 +1,16 @@
 #include "Server.hpp"
 
+
 Server::Server(int port, std::string password) : _port(port), _password(password) {
     // Initialisation du socket du serveur
     _serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (_serverSocket < 0) {
-        std::cerr << "Erreur lors de la création du socket" << std::endl;
+        std::cerr << "Error lors de la création du socket" << std::endl;
         exit(EXIT_FAILURE);
     }
     int opt = 1;
     if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-        std::cerr << "Erreur lors de la configuration du socket" << std::endl;
+        std::cerr << "Error lors de la configuration du socket" << std::endl;
         close(_serverSocket);
         exit(EXIT_FAILURE);
     }
@@ -19,19 +20,19 @@ Server::Server(int port, std::string password) : _port(port), _password(password
     serverAddr.sin_port = htons(_port);
 
     if (bind(_serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
-        std::cerr << "Erreur lors du bind" << std::endl;
+        std::cerr << "Error lors du bind" << std::endl;
         exit(EXIT_FAILURE);
     }
 
     if (listen(_serverSocket, 5) < 0) {
-        std::cerr << "Erreur lors du listen" << std::endl;
+        std::cerr << "Error lors du listen" << std::endl;
         exit(EXIT_FAILURE);
     }
 
     if (gethostname(hostname, sizeof(hostname)) == 0) {
         std::cout << "Nom d'hôte : " << hostname << std::endl;
     } else {
-        std::cerr << "Erreur lors de la récupération du nom d'hôte" << std::endl;
+        std::cerr << "Error lors de la récupération du nom d'hôte" << std::endl;
         exit(EXIT_FAILURE);;
     }
 
@@ -47,7 +48,7 @@ void Server::acceptNewConnection() {
     socklen_t clientLen = sizeof(clientAddr);
     int clientSocket = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientLen);
     if (clientSocket < 0) {
-        std::cerr << "Erreur lors de l'acceptation d'une connexion" << std::endl;
+        std::cerr << "Error lors de l'acceptation d'une connexion" << std::endl;
         return;
     }
 
@@ -74,7 +75,7 @@ void Server::handleClientMessage(int clientSocket) {
     char buffer[1024];
     int bytes_received = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     if (bytes_received <= 0) {
-        std::cerr << "Connexion fermée ou erreur lors de la réception" << std::endl;
+        std::cerr << "Connexion fermée ou Error lors de la réception" << std::endl;
          this->clientCounter--;
         close(clientSocket);
         for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
@@ -100,7 +101,7 @@ void Server::start() {
     while (true) {
         int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
         if (poll_count < 0) {
-            std::cerr << "Erreur lors de l'appel à poll()" << std::endl;
+            std::cerr << "Error lors de l'appel à poll()" << std::endl;
             exit(EXIT_FAILURE);
         }
 

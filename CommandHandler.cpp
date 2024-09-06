@@ -27,7 +27,7 @@ void CommandHandler::handleCommand(Client& client, const std::string& message, s
     std::string commandName = tokens[0];
     std::map<std::string, Command*>::iterator it = commands.find(commandName);
     if (it != commands.end()) {
-        std::cout << "Info: " << message;
+        // std::cout << "Info: " << message;
         if (commandName == "PRIVMSG") {
             PrivmsgCommand Msg;
             Msg.sendMsg(client, tokens, clients);//cmd msg

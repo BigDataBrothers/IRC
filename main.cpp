@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
         if (gethostname(hostname, sizeof(hostname)) == 0) {
             std::cout << "Nom du serveur (hostname) : " << hostname << std::endl;
         } else {
-            std::cerr << "Erreur lors de la récupération du nom du serveur" << std::endl;
+            std::cerr << "Error lors de la récupération du nom du serveur" << std::endl;
         }
         server.start();
     } catch (const std::exception& e) {

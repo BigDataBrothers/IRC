@@ -26,17 +26,17 @@ class Server {
         void handleClient(int client_socket);
         std::string getHostname() const;
     private:
-    void acceptNewConnection();
-    void handleClientMessage(int clientSocket);
+        void acceptNewConnection();
+        void handleClientMessage(int clientSocket);
 
-    int clientCounter;
-    int _serverSocket;
-    int _port;
-    std::vector<pollfd> _poll_fds;
-    std::string         _password;
-    std::map<int, Client> clients; // Map des sockets clients vers les objets Client
-    CommandHandler commandHandler; // Ajoutez un membre CommandHandler
-    char hostname[256];
+        int clientCounter;
+        int _serverSocket;
+        int _port;
+        std::vector<pollfd> _poll_fds;
+        std::string         _password;
+        std::map<int, Client> clients; // Map des sockets clients vers les objets Client
+        CommandHandler commandHandler; // Ajoutez un membre CommandHandler
+        char hostname[256];
 };
 
 
